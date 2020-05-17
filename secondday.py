@@ -87,11 +87,12 @@ def knncls():
 def navie_bayes():
     news = fetch_20newsgroups(subset='all')
     x_train, x_test, y_train, y_test = train_test_split(news.data, news.target, test_size=0.25)
+    print(x_train)
 
     tf = TfidfVectorizer()
     x_train = tf.fit_transform(x_train)
     x_test = tf.transform(x_test)
-    print(tf.get_feature_names())
+    print('feature_names:',tf.get_feature_names())
     print(x_train.toarray())
 
     mlt = MultinomialNB(alpha=1.0)
@@ -154,4 +155,5 @@ def random_forest():
 if __name__ == '__main__':
     # print(test_load_data())
     # decision_tree()
-    random_forest()
+    # random_forest()
+    navie_bayes()

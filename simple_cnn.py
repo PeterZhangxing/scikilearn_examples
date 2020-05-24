@@ -85,11 +85,17 @@ class MyConvNet(object):
 
             for i in range(50):
                 x_test,y_test = self.mnist.test.next_batch(1)
-                y_pre = sess.run(y_predict,feed_dict={x:x_test,y_true:y_test})
-                print('第%d次预测,预测值为%d,真实值为%d' % (
+                # y_pre = sess.run(y_predict,feed_dict={x:x_test,y_true:y_test})
+                # print('第%d次预测,预测值为%d,真实值为%d' % (
+                #     i,
+                #     tf.argmax(y_pre, 1).eval(),
+                #     tf.argmax(y_test, 1).eval()))
+
+                y_pre = sess.run(y_predict,feed_dict={x:x_test,})
+                print('第%d次预测,预测值为%d' % (
                     i,
-                    tf.argmax(y_pre, 1).eval(),
-                    tf.argmax(y_test, 1).eval()))
+                    tf.argmax(y_pre, 1).eval()
+                ))
 
         return None
 

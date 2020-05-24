@@ -61,6 +61,7 @@ def cnn_model(image_batch):
         x_relu1 = tf.nn.relu(tf.nn.conv2d(x_reshaped, w_conv1, strides=[1, 1, 1, 1], padding='SAME') + b_conv1)
         # [-1,10,40,32]
         x_pool1 = tf.nn.max_pool(x_relu1, [1, 2, 2, 1], [1, 2, 2, 1], 'SAME')
+        x_pool1 = tf.nn.dropout(x_pool1,0.75)
 
     with tf.variable_scope('conv2'):
         w_conv2 = weight_variables([3, 3, 32, 64])
@@ -69,10 +70,20 @@ def cnn_model(image_batch):
         x_relu2 = tf.nn.relu(tf.nn.conv2d(x_pool1, w_conv2, [1, 1, 1, 1], 'SAME') + b_conv2)
         # [-1,5,20,64]
         x_pool2 = tf.nn.max_pool(x_relu2, [1, 2, 2, 1], [1, 2, 2, 1], "SAME")
+        x_pool2 = tf.nn.dropout(x_pool2, 0.75)
+
+    with tf.variable_scope('conv3'):
+        w_conv3 = weight_variables([3, 3, 64, 64])
+        b_conv3 = bias_variables([64])
+        # [-1,5,20,64]
+        x_relu3 = tf.nn.relu(tf.nn.conv2d(x_pool2, w_conv3, [1, 1, 1, 1], 'SAME') + b_conv3)
+        # [-1,3,10,64]
+        x_pool3 = tf.nn.max_pool(x_relu3, [1, 2, 2, 1], [1, 2, 2, 1], "SAME")
+        x_pool3 = tf.nn.dropout(x_pool3, 0.75)
 
     with tf.variable_scope("model"):
-        image_reshaped = tf.reshape(x_pool2,[-1,5*20*64])
-        weights = weight_variables([5*20*64,4*26])
+        image_reshaped = tf.reshape(x_pool3,[-1,3*10*64])
+        weights = weight_variables([3*10*64,4*26])
         bias = bias_variables([4*26])
         y_pre = tf.matmul(tf.cast(image_reshaped, tf.float32), weights) + bias
 
@@ -97,7 +108,8 @@ def captcha_recgonise():
         ))
 
     with tf.variable_scope("optimizer"):
-        train_op = tf.train.GradientDescentOptimizer(0.1).minimize(loss)
+        train_op = tf.train.GradientDescentOptimizer(0.001).minimize(loss)
+        # train_op = tf.train.AdamOptimizer(0.001).minimize(loss)
 
     with tf.variable_scope("accuracy"):
         equal_list = tf.equal(tf.argmax(y_true,dimension=2),tf.argmax(tf.reshape(y_pre,[FLAGS.batch_size, FLAGS.label_num, FLAGS.letter_num]),dimension=2))
